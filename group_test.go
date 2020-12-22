@@ -63,7 +63,7 @@ func TestGroupCollectsErrors(t *testing.T) {
 	group.Go(func() error { return err1 })
 	group.Go(func() error { return err2 })
 
-	errs := group.Wait().Contents()
+	errs := group.Wait().Errors()
 	sortErrors(errs)
 
 	if !errors.Is(errs[0], err1) || !errors.Is(errs[1], err2) {
@@ -83,7 +83,7 @@ func TestGroupCollectsPanics(t *testing.T) {
 	group.Go(func() error { panic(err1) })
 	group.Go(func() error { panic(err2) })
 
-	errs := group.Wait().Contents()
+	errs := group.Wait().Errors()
 	sortErrors(errs)
 
 	if !errors.Is(errs[0], err1) || !errors.Is(errs[1], err2) {

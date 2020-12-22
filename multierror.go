@@ -20,8 +20,8 @@ type MultiError interface {
 	// Add another error into the MultiError, producing a new instance.
 	Add(error) MultiError
 
-	// Contents returns all wrapped errors contained by the MultiError.
-	Contents() []error
+	// Errors returns all wrapped errors contained by the MultiError.
+	Errors() []error
 }
 
 type multiError []error
@@ -67,7 +67,7 @@ func (me multiError) Add(err error) MultiError {
 	return multiError(append(copyErrs(me), err))
 }
 
-func (me multiError) Contents() []error {
+func (me multiError) Errors() []error {
 	return copyErrs(me)
 }
 

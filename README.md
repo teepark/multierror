@@ -7,12 +7,12 @@ MultiError is an interface which includes `error`, and adds two additional metho
 
 ```go
 Add(error) MultiError
-Contents() []error
+Errors() []error
 ```
 
 Think of `Add` like `append`, it can add another error into those being wrapped by a `MultiError` instance.
 
-`Contents` gives back the list of contained errors. But the `MultiError` implementation offered by this package also implements `As` and `Is`, so for most things you might want to do with the contained errors, reach for `errors.Is` or `errors.As` first.
+`Errors` gives back the list of contained errors. But the `MultiError` implementation offered by this package also implements `As` and `Is`, so for most things you might want to do with the contained errors, reach for `errors.Is` or `errors.As` first.
 
 There is only one way to create instances of this package's `MultiError` implementation, the function `Wrap(...error) MultiError`.
 

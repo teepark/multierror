@@ -79,12 +79,8 @@ func (g *Group) Wait() MultiError {
 
 // Error returns a MultiError wrapping all errors from the Group's goroutines.
 func (g *Group) Error() MultiError {
-	g.mut.Lock()
-	defer g.mut.Unlock()
-
-	errs := copyErrs(g.errs)
-	if errs == nil {
+	if g.errs == nil {
 		return nil
 	}
-	return multiError(errs)
+	return g.errs
 }

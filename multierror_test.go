@@ -57,6 +57,27 @@ func TestMultiErrorAsAnEarlierWrapped(t *testing.T) {
 	}
 }
 
+func TestMultiErrorAddFlattensArgument(t *testing.T) {
+	err := multierror.Wrap(new(SomeError))
+	err2 := multierror.Wrap(new(SomeError), new(SomeError))
+
+	result := err.Add(err2)
+	if len(result.Errors()) != 3 {
+		t.Errorf("Add should flatten the argument if it is a MultiError")
+	}
+}
+
+func TestMultiErrorAddFlattensArgumentRecursively(t *testing.T) {
+	err := multierror.Wrap(new(SomeError))
+	grandchildren := multierror.Wrap(new(SomeError), new(SomeError))
+	err2 := multierror.Wrap(new(SomeError), grandchildren)
+
+	result := err.Add(err2)
+	if len(result.Errors()) != 4 {
+		t.Errorf("Add should recursively flatten a MultiError argument")
+	}
+}
+
 func TestNilMultiErrorIsNil(t *testing.T) {
 	err := multierror.Wrap(nil)
 	if err != nil {

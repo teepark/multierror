@@ -33,7 +33,11 @@ func Wrap(errs ...error) MultiError {
 	errors := make([]error, 0, len(errs))
 	for _, err := range errs {
 		if err != nil {
-			errors = append(errors, err)
+			if merr, ok := err.(MultiError); ok {
+				errors = append(errors, merr.Errors()...)
+			} else {
+				errors = append(errors, err)
+			}
 		}
 	}
 	if len(errors) == 0 {
@@ -64,7 +68,13 @@ func (me multiError) Add(err error) MultiError {
 	if err == nil {
 		return me
 	}
-	return multiError(append(copyErrs(me), err))
+	var errs []error
+	if merr, ok := err.(MultiError); ok {
+		errs = append(copyErrs(me), merr.Errors()...)
+	} else {
+		errs = append(copyErrs(me), err)
+	}
+	return multiError(errs)
 }
 
 func (me multiError) Errors() []error {

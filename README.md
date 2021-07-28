@@ -26,4 +26,4 @@ The zero value of `Group` is usable immediately, and its method `(*Group) Go(fun
 
 As a convenience, `Group` also supports a method `(*Group) Error() MultiError` which produces the complete `MultiError` again. This is also safe for concurrent use, so you could use this method to pull a `MultiError` wrapping all the errors *so far* when only a subset of goroutines have completed.
 
-Finally, by default a `Group` will capture panics by the goroutines it starts, turn them into errors, and include them in the `MultiError`. To change this behavior call `(*Group) RecoverPanics(bool)` and pass it `false` - before starting any goroutines.
+Finally, by default a `Group` will capture panics by the goroutines it starts, turn them into errors, and include them in the `MultiError`. To change this behavior call `(*Group) RecoverPanics(bool)` and pass it `false`.

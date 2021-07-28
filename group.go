@@ -3,6 +3,7 @@ package multierror
 import (
 	"fmt"
 	"sync"
+	"sync/atomic"
 )
 
 // Group represents a sync.WaitGroup which can start multiple goroutines and
@@ -15,7 +16,7 @@ type Group struct {
 	mut  sync.Mutex
 	errs multiError
 
-	allowPanic bool
+	allowPanic uint32
 }
 
 // RecoverPanics toggles panic recovery from goroutines started by Go (default true).
@@ -27,7 +28,11 @@ func (g *Group) RecoverPanics(toggle bool) {
 	// the bool is flipped to 'allowPanic' on the struct so that it will
 	// default to false for the zero value Group, thus the logical
 	// 'recover panics' bool defaults to true.
-	g.allowPanic = !toggle
+	var ui uint32
+	if toggle {
+		ui = 1
+	}
+	atomic.StoreUint32(&g.allowPanic, ui)
 }
 
 // Go starts a new goroutine running the provided function.
@@ -40,7 +45,7 @@ func (g *Group) Go(f func() error) {
 	go func() {
 		defer g.wg.Done()
 
-		if !g.allowPanic {
+		if atomic.LoadUint32(&g.allowPanic) == 0 {
 			defer func() {
 				r := recover()
 				if r == nil {

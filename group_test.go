@@ -90,11 +90,11 @@ func TestGroupCollectsPanics(t *testing.T) {
 		t.Errorf("incorrect errors returned: %+v", errs)
 	}
 
-	if errs[0].Error()[:20] != "panic in goroutine: " {
-		t.Errorf("expected 'panic in goroutine: ', got '%s'", errs[0].Error()[:20])
+	if errs[0].Error()[:16] != "captured panic: " {
+		t.Errorf("expected 'captured panic: ', got '%s'", errs[0].Error()[:20])
 	}
-	if errs[1].Error()[:20] != "panic in goroutine: " {
-		t.Errorf("expected 'panic in goroutine: ', got '%s'", errs[1].Error()[:20])
+	if errs[1].Error()[:16] != "captured panic: " {
+		t.Errorf("expected 'captured panic: ', got '%s'", errs[1].Error()[:20])
 	}
 }
 

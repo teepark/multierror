@@ -53,9 +53,9 @@ func (g *Group) Go(f func() error) {
 				}
 				var wrapped error
 				if err, ok := r.(error); ok {
-					wrapped = fmt.Errorf("panic in goroutine: %w", err)
+					wrapped = fmt.Errorf("captured panic: %w", err)
 				} else {
-					wrapped = fmt.Errorf("panic in goroutine: %#v", r)
+					wrapped = fmt.Errorf("captured panic: %#v", r)
 				}
 
 				g.addError(wrapped)

@@ -9,7 +9,7 @@ import (
 // MultiError is a container for multiple errors, and also an error itself.
 //
 // Implementations should support the Is() and As() protocols so that
-// instances evaluate as equivalent to, and unmarshal into, any of their
+// instances evaluate as equivalent to, and resolve into, any of their
 // contained errors.
 //
 // Unwrap() is not necessarily supported however, as it can be impossible
@@ -26,24 +26,18 @@ type MultiError interface {
 
 type multiError []error
 
-// Wrap creates a MultiError around an initial error instance.
+// Wrap creates a MultiError around initial error instances.
 //
-// Wrap(nil) returns nil.
+// Wrapping an empty list or all-nils returns nil.
 func Wrap(errs ...error) MultiError {
-	errors := make([]error, 0, len(errs))
+	var errors multiError
 	for _, err := range errs {
-		if err != nil {
-			if merr, ok := err.(MultiError); ok {
-				errors = append(errors, merr.Errors()...)
-			} else {
-				errors = append(errors, err)
-			}
-		}
+		errors = errors.Add(err).(multiError)
 	}
 	if len(errors) == 0 {
 		return nil
 	}
-	return multiError(errors)
+	return errors
 }
 
 func (me multiError) Error() string {
@@ -70,32 +64,42 @@ func (me multiError) Add(err error) MultiError {
 	}
 	var errs []error
 	if merr, ok := err.(MultiError); ok {
-		errs = append(copyErrs(me), merr.Errors()...)
+		errs = append(me.Errors(), merr.Errors()...)
 	} else {
-		errs = append(copyErrs(me), err)
+		errs = append(me.Errors(), err)
 	}
 	return multiError(errs)
 }
 
 func (me multiError) Errors() []error {
-	return copyErrs(me)
+	if len(me) == 0 {
+		return nil
+	}
+	result := make([]error, len(me))
+	copy(result, me)
+	return result
 }
 
 func (me multiError) Is(target error) bool {
+	// When comparing to another multiError instance we're looking
+	// for an exact match: all contained errors must match, in order.
+	if tgt, ok := target.(*multiError); ok {
+		target = *tgt
+	}
 	if tgt, ok := target.(multiError); ok {
 		if len(me) != len(tgt) {
 			return false
 		}
-
 		for i, a := range me {
 			b := tgt[i]
-			if a != b {
+			if !errors.Is(a, b) {
 				return false
 			}
 		}
 
 		return true
 	}
+
 	for _, err := range me {
 		if errors.Is(err, target) {
 			return true
@@ -105,10 +109,15 @@ func (me multiError) Is(target error) bool {
 }
 
 func (me multiError) As(target interface{}) bool {
-	if tgt, ok := target.(*multiError); ok && cap(*tgt) >= len(me) {
-		*tgt = (*tgt)[:len(me)]
-		copy(*tgt, me)
-		return true
+	if tgt, ok := target.(*multiError); ok {
+		if cap(*tgt) >= len(me) {
+			// target is a *multiError with enough capacity
+			*tgt = (*tgt)[:len(me)]
+			copy(*tgt, me)
+			return true
+		} else {
+			*tgt = multiError(me.Errors())
+		}
 	}
 	for _, err := range me {
 		if errors.As(err, target) {
@@ -116,13 +125,4 @@ func (me multiError) As(target interface{}) bool {
 		}
 	}
 	return false
-}
-
-func copyErrs(errs []error) []error {
-	if len(errs) == 0 {
-		return nil
-	}
-	result := make([]error, len(errs))
-	copy(result, errs)
-	return result
 }

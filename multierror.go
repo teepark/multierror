@@ -115,9 +115,8 @@ func (me multiError) As(target interface{}) bool {
 			*tgt = (*tgt)[:len(me)]
 			copy(*tgt, me)
 			return true
-		} else {
-			*tgt = multiError(me.Errors())
 		}
+		*tgt = multiError(me.Errors())
 	}
 	for _, err := range me {
 		if errors.As(err, target) {

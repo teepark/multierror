@@ -7,7 +7,7 @@ import (
 	"github.com/teepark/multierror"
 )
 
-type SomeError struct {}
+type SomeError struct{}
 
 func (s *SomeError) Error() string {
 	return "yep that's an error"

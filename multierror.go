@@ -8,12 +8,13 @@ import (
 
 // MultiError is a container for multiple errors, and also an error itself.
 //
-// Implementations should support the Is() and As() protocols so that
+// This library's implementations supports the Is() and As() protocols so that
 // instances evaluate as equivalent to, and resolve into, any of their
 // contained errors.
 //
-// Unwrap() is not necessarily supported however, as it can be impossible
-// for a multi error to provide a single wrapped error.
+// Multierror instances also Unwrap() into a thin wrapper around the first
+// contained error, so that the unwrap chain will progress through each of the
+// error chains contained in the original multierror in depth-first order.
 type MultiError interface {
 	error
 

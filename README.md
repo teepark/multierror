@@ -14,7 +14,7 @@ Think of `Add` like `append`, it can add another error into those being wrapped 
 
 `Errors` gives back the list of contained errors. But the `MultiError` implementation offered by this package also implements `As` and `Is`, so for most things you might want to do with the contained errors, reach for `errors.Is` or `errors.As` first.
 
-There is only one way to create instances of this package's `MultiError` implementation, the function `Wrap(...error) MultiError`.
+The interface behind `errors.Unwrap` is also supported, where iteratively progressing through the unwrap chain goes through the unwrap chains of each contained error, proceeding in depth-first order. To support this change to the results of `Unwrap` there is a thin wrapper type that is produced at each step, but it also passes through `Error`, `Is`, and `As`, and also supports passing through stack traces from popular errors libraries via interfaces expected by a few popular error aggregation services.
 
 
 Group
